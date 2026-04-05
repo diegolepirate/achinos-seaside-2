@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACHINOS — Seaside Restaurant · Analipsi, Crete</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --cream:#FDFAF4;--white:#fff;--turq:#00B4D8;--deep:#0B2545;
+  --gold:#C8A951;--coral:#E8634A;--sand:#F5E6C8;--night:#091520;
+}
+html{font-size:16px;scroll-behavior:auto}
+html.lenis,html.lenis body{height:auto}
+body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--night);overflow-x:hidden}
+::selection{background:var(--gold);color:var(--white)}
+h1,h2,h3{font-family:'Playfair Display',serif;font-weight:900}
+a{text-decoration:none;color:inherit}
+img{display:block;max-width:100%}
+button,input,textarea,select{font-family:inherit;border:none;background:none;outline:none}
+
+/* ===== NAV ===== */
+.nav{position:fixed;top:0;right:0;z-index:100;padding:28px 40px}
+.burger{width:36px;height:24px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer}
+.burger span{width:100%;height:2px;background:var(--night);transition:.4s;transform-origin:center}
+.burger.open span:nth-child(1){transform:rotate(45deg) translate(6px,8px)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:rotate(-45deg) translate(6px,-8px)}
+.fullnav{position:fixed;inset:0;z-index:99;background:var(--deep);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;opacity:0;pointer-events:none;transition:.5s}
+.fullnav.open{opacity:1;pointer-events:all}
+.fullnav a{font-family:'Playfair Display',serif;font-size:clamp(1.5rem,3vw,2.2rem);color:var(--cream);letter-spacing:.05em;transition:.3s;font-style:italic}
+.fullnav a:hover{color:var(--gold)}
+
+/* ===== HERO ===== */
+.hero{position:relative;min-height:100vh;background:var(--cream);overflow:hidden;padding:0}
+.hero-img{width:65%;max-height:75vh;object-fit:cover;margin:0}
+.hero-massive{
+  position:absolute;bottom:-2vw;left:0;right:0;
+  display:flex;align-items:baseline;justify-content:space-between;
+  padding:0 3vw;pointer-events:none;
+}
+.hero-massive .num{
+  font-family:'Playfair Display',serif;font-size:clamp(6rem,14vw,14rem);
+  font-weight:400;font-style:italic;color:var(--night);line-height:.85;
+}
+.hero-massive .word{
+  font-family:'Playfair Display',serif;font-size:clamp(5rem,12vw,12rem);
+  font-weight:900;color:var(--night);line-height:.85;letter-spacing:-.02em;
+  position:relative;
+}
+/* SVG wave decoration inline */
+.hero-wave{position:absolute;right:0;top:-8vw;width:8vw;height:8vw;opacity:.15}
+
+.hero-intro{
+  max-width:800px;margin:0 auto;padding:60px 48px 0;
+  font-family:'Cormorant Garamond',serif;font-size:clamp(1.4rem,2.5vw,2.2rem);
+  font-weight:300;line-height:1.6;color:var(--night);text-align:center;
+}
+
+.hero-photos{
+  display:grid;grid-template-columns:1.2fr 1fr;gap:20px;
+  padding:60px 48px 80px;max-width:1200px;margin:0 auto;
+}
+.hero-photos img{width:100%;height:400px;object-fit:cover;border-radius:4px}
+
+/* ===== SECTIONS WITH COLOR BG ===== */
+.section-colored{position:relative;overflow:hidden}
+
+/* Villa-style cards = dish sections */
+.dish-section{
+  background:var(--deep);padding:80px 0;
+  display:grid;grid-template-columns:1fr 1fr;min-height:80vh;
+}
+.dish-section:nth-child(even){direction:rtl}
+.dish-section:nth-child(even) > *{direction:ltr}
+
+.dish-img-wrap{position:relative;overflow:hidden}
+.dish-img{width:100%;height:100%;object-fit:cover;min-height:500px;transition:transform .8s cubic-bezier(.16,1,.3,1)}
+.dish-section:hover .dish-img{transform:scale(1.03)}
+
+.dish-info{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:60px 64px;color:var(--cream);
+}
+.dish-info-tag{font-size:.65rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.dish-info-desc{font-size:.9rem;line-height:1.8;color:rgba(253,250,244,.5);margin-bottom:24px}
+.dish-info-stats{font-size:.8rem;color:rgba(253,250,244,.35);line-height:1.8;margin-bottom:28px}
+.dish-cta{
+  font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--cream);
+  display:inline-flex;align-items:center;gap:8px;transition:.3s;align-self:flex-start;
+}
+.dish-cta:hover{color:var(--gold)}
+.dish-cta-line{width:30px;height:1px;background:currentColor;transition:width .3s}
+.dish-cta:hover .dish-cta-line{width:45px}
+
+/* Massive name between sections */
+.dish-name-row{
+  background:var(--deep);padding:0 3vw 60px;
+  display:flex;align-items:baseline;justify-content:space-between;
+}
+.dish-name-row .villa-name{
+  font-family:'Playfair Display',serif;font-size:clamp(3rem,8vw,8rem);
+  font-style:italic;font-weight:400;color:var(--cream);
+}
+.dish-name-row .villa-label{
+  font-family:'Playfair Display',serif;font-size:clamp(3rem,8vw,8rem);
+  font-weight:900;color:var(--cream);letter-spacing:-.02em;
+}
+
+/* ===== EXPERIENCE / GALLERY ===== */
+.experience{background:var(--white);overflow:hidden}
+.exp-hero{position:relative;overflow:hidden}
+.exp-hero img{width:75%;height:auto;max-height:70vh;object-fit:cover}
+.exp-hero-text{
+  position:absolute;bottom:0;right:0;width:40%;
+}
+.exp-hero-text img{width:100%;height:auto}
+
+.exp-statement{
+  padding:60px 48px;
+  font-family:'Playfair Display',serif;font-size:clamp(2rem,4.5vw,4rem);
+  font-weight:900;line-height:1.15;color:var(--night);
+  text-transform:uppercase;letter-spacing:-.01em;
+  max-width:900px;
+}
+
+.exp-grid{
+  display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:0;
+  background:var(--turq);
+}
+.exp-grid-empty{background:var(--turq)}
+.exp-grid img{width:100%;height:100%;object-fit:cover;min-height:400px}
+.exp-cta-row{
+  background:var(--turq);padding:20px 48px 20px;
+  display:flex;justify-content:flex-end;
+}
+.exp-cta{
+  font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--white);
+  display:inline-flex;align-items:center;gap:8px;
+}
+.exp-cta-line{width:30px;height:1px;background:var(--white)}
+
+/* ===== SERVICES = ABOUT SECTION ===== */
+.services{background:var(--white);padding:100px 0;overflow:hidden}
+.srv-photos{
+  display:grid;grid-template-columns:1.4fr 1fr;gap:20px;
+  padding:0 48px;max-width:1200px;margin:0 auto;
+}
+.srv-photos img{width:100%;height:380px;object-fit:cover;border-radius:4px}
+
+.srv-text{
+  max-width:900px;margin:60px auto 0;padding:0 48px;
+}
+.srv-title{
+  font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.5rem);
+  font-weight:300;font-style:italic;line-height:1.3;color:var(--night);
+  margin-bottom:24px;
+}
+.srv-title em{font-style:italic;color:var(--gold)}
+.srv-desc{font-size:.9rem;line-height:1.9;color:rgba(10,22,40,.45);margin-bottom:24px}
+.srv-cta{
+  font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--night);
+  display:inline-flex;align-items:center;gap:8px;
+}
+.srv-cta-line{width:30px;height:1px;background:var(--night)}
+
+/* ===== CTA / RESERVATION ===== */
+.cta-section{position:relative;overflow:hidden}
+.cta-img{width:100%;height:80vh;object-fit:cover}
+.cta-overlay{
+  position:absolute;inset:0;background:rgba(10,22,40,.4);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;
+}
+.cta-title{
+  font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,4.5rem);
+  font-weight:300;font-style:italic;color:var(--cream);text-align:center;
+}
+.cta-btn{
+  padding:16px 48px;border:1px solid rgba(253,250,244,.3);color:var(--cream);
+  font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;
+  backdrop-filter:blur(10px);transition:.4s;
+}
+.cta-btn:hover{background:var(--gold);border-color:var(--gold);color:var(--night)}
+
+/* ===== RESERVATION FORM ===== */
+.res-form-section{background:var(--cream);padding:100px 48px}
+.res-inner{max-width:800px;margin:0 auto}
+.res-head{text-align:center;margin-bottom:48px}
+.res-tag{font-size:.6rem;letter-spacing:.5em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.res-h{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.5rem);font-weight:300;font-style:italic;color:var(--night)}
+.res-form{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fg{position:relative}
+.fg.full{grid-column:1/-1}
+.fg input,.fg select,.fg textarea{
+  width:100%;padding:16px 18px;background:var(--white);
+  border:1px solid rgba(10,22,40,.08);border-radius:4px;
+  color:var(--night);font-size:.85rem;transition:.4s;
+}
+.fg input::placeholder,.fg textarea::placeholder{color:rgba(10,22,40,.25)}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,169,81,.08)}
+.fg select option{background:var(--white);color:var(--night)}
+.fg textarea{resize:vertical;min-height:90px}
+.res-submit{grid-column:1/-1;display:flex;justify-content:center;margin-top:8px}
+.res-submit button{
+  padding:18px 56px;background:var(--night);color:var(--cream);font-size:.72rem;
+  font-weight:600;letter-spacing:.25em;text-transform:uppercase;border-radius:4px;
+  transition:.4s;cursor:pointer;
+}
+.res-submit button:hover{background:var(--gold);color:var(--night)}
+.res-links{margin-top:36px;text-align:center;display:flex;justify-content:center;gap:32px;flex-wrap:wrap}
+.res-links a{font-size:.78rem;color:rgba(10,22,40,.35);letter-spacing:.08em;transition:.3s}
+.res-links a:hover{color:var(--gold)}
+
+/* ===== FOOTER ===== */
+.footer{background:var(--white);padding:60px 48px 32px;text-align:center;border-top:1px solid rgba(10,22,40,.06)}
+.ft-massive{
+  display:flex;align-items:baseline;justify-content:center;gap:3vw;
+  margin-bottom:24px;
+}
+.ft-massive .num{font-family:'Playfair Display',serif;font-size:clamp(3rem,7vw,7rem);font-weight:400;font-style:italic;color:var(--night);line-height:.85}
+.ft-massive .word{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,6rem);font-weight:900;color:var(--night);letter-spacing:-.02em}
+.ft-links{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:20px}
+.ft-links a{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(10,22,40,.35);transition:.3s}
+.ft-links a:hover{color:var(--gold)}
+.ft-copy{font-size:.6rem;color:rgba(10,22,40,.15);letter-spacing:.12em}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1024px){
+  .dish-section{grid-template-columns:1fr}
+  .dish-section:nth-child(even){direction:ltr}
+  .dish-img{min-height:350px}
+  .dish-info{padding:40px 32px}
+  .exp-grid{grid-template-columns:1fr 1fr}
+  .exp-grid > :last-child{display:none}
+}
+@media(max-width:768px){
+  .hero-img{width:100%}
+  .hero-massive{position:relative;bottom:auto;padding:20px 24px;flex-wrap:wrap}
+  .hero-massive .num{font-size:clamp(4rem,16vw,8rem)}
+  .hero-massive .word{font-size:clamp(3.5rem,14vw,7rem)}
+  .hero-intro{padding:40px 24px 0;font-size:1.2rem}
+  .hero-photos{grid-template-columns:1fr;padding:40px 24px 60px}
+  .hero-photos img{height:280px}
+  .dish-name-row{flex-wrap:wrap;gap:8px}
+  .exp-statement{padding:40px 24px;font-size:clamp(1.5rem,5vw,2.5rem)}
+  .srv-photos{grid-template-columns:1fr;padding:0 24px}
+  .srv-text{padding:0 24px}
+  .res-form-section{padding:60px 24px}
+  .res-form{grid-template-columns:1fr}
+  .footer{padding:40px 24px 24px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="burger" id="burger"><span></span><span></span><span></span></div>
+</div>
+<div class="fullnav" id="fullnav">
+  <a href="#hero" onclick="closeNav()">Home</a>
+  <a href="#dishes" onclick="closeNav()">Menu</a>
+  <a href="#experience" onclick="closeNav()">Experience</a>
+  <a href="#services" onclick="closeNav()">Services</a>
+  <a href="#reservation" onclick="closeNav()">Reserve</a>
+  <a href="https://instagram.com/achinos_seaside" target="_blank">Instagram</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <img class="hero-img" src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1400&q=80" alt="Achinos restaurant terrace">
+
+  <div class="hero-massive">
+    <span class="num">Achinos</span>
+    <span class="word">SEASIDE</span>
+  </div>
+</section>
+
+<!-- INTRO -->
+<section style="background:var(--white)">
+  <div class="hero-intro">
+    Nestled directly on the golden sands of Analipsi beach in Hersonissos, Crete, Achinos offers an unparalleled seaside dining experience where the freshest Aegean catch meets time-honored Mediterranean flavours.
+  </div>
+  <div class="hero-photos">
+    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80" alt="Analipsi beach" style="border-radius:4px">
+    <img src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&q=80" alt="Grilled octopus" style="border-radius:4px">
+  </div>
+</section>
+
+<!-- DISHES (like Villas) -->
+<div id="dishes">
+
+  <!-- Dish 1 -->
+  <div class="dish-section">
+    <div class="dish-img-wrap">
+      <img class="dish-img" src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=1000&q=80" alt="Grilled Octopus">
+    </div>
+    <div class="dish-info">
+      <div class="dish-info-tag">Signature Dish</div>
+      <div class="dish-info-desc">Our signature chargrilled octopus, tenderized to perfection, served with capers, extra virgin olive oil, and a hint of lemon fresh from our garden. A dish that embodies the soul of the Aegean.</div>
+      <div class="dish-info-stats">Locally sourced &middot; Chargrilled daily<br>Paired with Cretan wine</div>
+      <a href="#reservation" class="dish-cta">Reserve a table <span class="dish-cta-line"></span></a>
+    </div>
+  </div>
+  <div class="dish-name-row">
+    <span class="villa-name">Grilled</span>
+    <span class="villa-label">OCTOPUS</span>
+  </div>
+
+  <!-- Dish 2 -->
+  <div class="dish-section">
+    <div class="dish-img-wrap">
+      <img class="dish-img" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1000&q=80" alt="Sea Bream">
+    </div>
+    <div class="dish-info">
+      <div class="dish-info-tag">Chef's Selection</div>
+      <div class="dish-info-desc">Market-fresh whole sea bream, grilled to perfection with wild Cretan oregano, sea salt, and drizzled with our family's olive oil. The catch of the day, every day.</div>
+      <div class="dish-info-stats">Whole fish &middot; Wild herbs<br>Served with seasonal greens</div>
+      <a href="#reservation" class="dish-cta">Reserve a table <span class="dish-cta-line"></span></a>
+    </div>
+  </div>
+  <div class="dish-name-row">
+    <span class="villa-name">Whole Sea</span>
+    <span class="villa-label">BREAM</span>
+  </div>
+
+  <!-- Dish 3 -->
+  <div class="dish-section">
+    <div class="dish-img-wrap">
+      <img class="dish-img" src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1000&q=80" alt="Fine dining">
+    </div>
+    <div class="dish-info">
+      <div class="dish-info-tag">Flambeed Tableside</div>
+      <div class="dish-info-desc">Pan-seared kefalograviera cheese, flambeed right at your table. Crispy golden crust, molten center, finished with a squeeze of lemon and a drizzle of honey.</div>
+      <div class="dish-info-stats">Tableside experience &middot; Local cheese<br>Paired with our Aegean Spritz</div>
+      <a href="#reservation" class="dish-cta">Reserve a table <span class="dish-cta-line"></span></a>
+    </div>
+  </div>
+  <div class="dish-name-row">
+    <span class="villa-name">Cheese</span>
+    <span class="villa-label">SAGANAKI</span>
+  </div>
+
+</div>
+
+<!-- EXPERIENCE -->
+<section class="experience" id="experience">
+  <div class="exp-hero">
+    <img src="https://images.unsplash.com/photo-1519046904884-53103b34b206?w=1400&q=80" alt="Aegean sea view">
+  </div>
+
+  <div class="exp-statement">
+    Between the crystal-clear Aegean waters and the warmth of Cretan hospitality, an unforgettable dining experience awaits
+  </div>
+
+  <div class="exp-grid">
+    <img src="https://images.unsplash.com/photo-1616036740257-9449ea1f6605?w=800&q=80" alt="Sunset">
+    <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" alt="Terrace dining">
+    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80" alt="Beach">
+  </div>
+  <div class="exp-cta-row">
+    <a href="#reservation" class="exp-cta">Discover the experience <span class="exp-cta-line"></span></a>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="srv-photos">
+    <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&q=80" alt="Seaside view">
+    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80" alt="Fresh food">
+  </div>
+  <div class="srv-text">
+    <h2 class="srv-title">Sit back and relax, we take care of <em>everything</em></h2>
+    <p class="srv-desc">From the moment you arrive, Yannis and his team create a seamless beachfront experience. Fresh catches grilled to order, hand-crafted cocktails with local spirits, and the sound of the Aegean as your soundtrack. Every detail is attended to, every moment savoured.</p>
+    <a href="#reservation" class="srv-cta">Discover our services <span class="srv-cta-line"></span></a>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <img class="cta-img" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80" alt="Analipsi Beach">
+  <div class="cta-overlay">
+    <h2 class="cta-title">Begin your seaside<br><em>experience</em></h2>
+    <a href="#reservation" class="cta-btn">Reserve your table</a>
+  </div>
+</section>
+
+<!-- RESERVATION -->
+<section class="res-form-section" id="reservation">
+  <div class="res-inner">
+    <div class="res-head">
+      <div class="res-tag">Join Us</div>
+      <h2 class="res-h">Reserve Your Table</h2>
+    </div>
+    <form class="res-form" onsubmit="handleRes(event)">
+      <div class="fg"><input type="text" placeholder="Your Name" required></div>
+      <div class="fg"><input type="email" placeholder="Email Address" required></div>
+      <div class="fg"><input type="tel" placeholder="Phone Number"></div>
+      <div class="fg"><input type="date" required></div>
+      <div class="fg"><select required><option value="" disabled selected>Select Time</option><option>12:00</option><option>13:00</option><option>14:00</option><option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option><option>22:00</option></select></div>
+      <div class="fg"><select required><option value="" disabled selected>Guests</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6+</option></select></div>
+      <div class="fg full"><textarea placeholder="Special requests or occasion..." rows="3"></textarea></div>
+      <div class="res-submit"><button type="submit">Reserve Now</button></div>
+    </form>
+    <div class="res-links">
+      <a href="tel:+306946366485">+30 694 636 6485</a>
+      <a href="https://instagram.com/achinos_seaside" target="_blank">@achinos_seaside</a>
+      <a href="https://maps.google.com/?q=Analipsi+Hersonissos+Crete" target="_blank">Analipsi, Hersonissos, Crete</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="ft-massive">
+    <span class="num">Achinos</span>
+    <span class="word">SEASIDE</span>
+  </div>
+  <div class="ft-links">
+    <a href="#hero">Home</a>
+    <a href="#dishes">Menu</a>
+    <a href="#experience">Experience</a>
+    <a href="#services">Services</a>
+    <a href="#reservation">Reserve</a>
+    <a href="https://instagram.com/achinos_seaside" target="_blank">Instagram</a>
+  </div>
+  <p class="ft-copy">&copy; 2025 Achinos Seaside Restaurant &mdash; Analipsi Beach, Hersonissos, Crete</p>
+</footer>
+
+<script>
+(function(){
+'use strict';
+gsap.registerPlugin(ScrollTrigger);
+
+// Lenis
+const lenis = new Lenis({duration:1.2,easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)),touchMultiplier:2});
+lenis.on('scroll',ScrollTrigger.update);
+gsap.ticker.add(t=>lenis.raf(t*1000));
+gsap.ticker.lagSmoothing(0);
+
+// Nav
+const burger=document.getElementById('burger'),fn=document.getElementById('fullnav');
+let no=false;
+burger.addEventListener('click',()=>{no=!no;burger.classList.toggle('open',no);fn.classList.toggle('open',no)});
+window.closeNav=()=>{no=false;burger.classList.remove('open');fn.classList.remove('open')};
+
+// Hero massive entrance
+gsap.from('.hero-massive .num',{y:80,opacity:0,duration:1,ease:'power3.out',delay:.2});
+gsap.from('.hero-massive .word',{y:80,opacity:0,duration:1,ease:'power3.out',delay:.4});
+
+// Hero image parallax
+gsap.to('.hero-img',{yPercent:15,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:true}});
+
+// Intro text fade
+gsap.from('.hero-intro',{y:40,opacity:0,duration:.8,ease:'power2.out',scrollTrigger:{trigger:'.hero-intro',start:'top 80%'}});
+
+// Hero photos reveal
+document.querySelectorAll('.hero-photos img').forEach((img,i)=>{
+  gsap.from(img,{y:50,opacity:0,duration:.8,delay:i*.15,ease:'power2.out',scrollTrigger:{trigger:'.hero-photos',start:'top 80%'}});
+});
+
+// Dish sections
+document.querySelectorAll('.dish-section').forEach(sec=>{
+  const img=sec.querySelector('.dish-img');
+  const info=sec.querySelector('.dish-info');
+  // Image parallax
+  gsap.to(img,{yPercent:-10,ease:'none',scrollTrigger:{trigger:sec,start:'top bottom',end:'bottom top',scrub:true}});
+  // Info reveal
+  gsap.from(info.children,{y:30,opacity:0,stagger:.08,duration:.7,ease:'power2.out',scrollTrigger:{trigger:info,start:'top 75%'}});
+});
+
+// Dish names
+document.querySelectorAll('.dish-name-row').forEach(row=>{
+  gsap.from(row.children,{y:60,opacity:0,stagger:.15,duration:.8,ease:'power3.out',scrollTrigger:{trigger:row,start:'top 85%'}});
+});
+
+// Experience
+gsap.from('.exp-hero img',{scale:1.1,ease:'none',scrollTrigger:{trigger:'.exp-hero',start:'top bottom',end:'bottom top',scrub:true}});
+gsap.from('.exp-statement',{y:40,opacity:0,duration:.8,ease:'power2.out',scrollTrigger:{trigger:'.exp-statement',start:'top 80%'}});
+document.querySelectorAll('.exp-grid img').forEach((img,i)=>{
+  gsap.from(img,{y:40,opacity:0,duration:.7,delay:i*.1,ease:'power2.out',scrollTrigger:{trigger:'.exp-grid',start:'top 80%'}});
+});
+
+// Services
+document.querySelectorAll('.srv-photos img').forEach((img,i)=>{
+  gsap.from(img,{y:40,opacity:0,duration:.7,delay:i*.12,ease:'power2.out',scrollTrigger:{trigger:'.srv-photos',start:'top 80%'}});
+});
+gsap.from('.srv-title',{y:30,opacity:0,duration:.7,ease:'power2.out',scrollTrigger:{trigger:'.srv-text',start:'top 80%'}});
+gsap.from('.srv-desc',{y:20,opacity:0,duration:.6,delay:.1,ease:'power2.out',scrollTrigger:{trigger:'.srv-text',start:'top 80%'}});
+
+// CTA parallax
+gsap.to('.cta-img',{yPercent:15,ease:'none',scrollTrigger:{trigger:'.cta-section',start:'top bottom',end:'bottom top',scrub:true}});
+gsap.from('.cta-title',{y:30,opacity:0,duration:.8,ease:'power2.out',scrollTrigger:{trigger:'.cta-overlay',start:'top 70%'}});
+
+// Form fields
+document.querySelectorAll('.fg').forEach((g,i)=>{
+  gsap.from(g,{y:25,opacity:0,duration:.5,delay:i*.04,ease:'power2.out',scrollTrigger:{trigger:'.res-form',start:'top 85%'}});
+});
+
+// Footer
+gsap.from('.ft-massive > *',{y:40,opacity:0,stagger:.12,duration:.7,ease:'power3.out',scrollTrigger:{trigger:'.footer',start:'top 90%'}});
+
+// Form handler
+window.handleRes=e=>{e.preventDefault();const b=e.target.querySelector('button');b.textContent='Thank you!';b.style.background='var(--turq)';b.style.color='#fff';setTimeout(()=>{b.textContent='Reserve Now';b.style.background='';b.style.color='';e.target.reset()},2500)};
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)lenis.scrollTo(t,{offset:-20});closeNav()})});
+
+})();
+</script>
+</body>
+</html>
